@@ -263,6 +263,7 @@ public class PipedInputStream extends InputStream {
     
     synchronized void receiveError(RuntimeException error) {
         this.error = error;
+        notifyAll();
     }
 
     private void checkStateForReceive() throws IOException {
@@ -327,6 +328,9 @@ public class PipedInputStream extends InputStream {
         readSide = Thread.currentThread();
         int trials = 2;
         while (in < 0) {
+            if (error != null) {
+                throw error;
+            }
             if (closedByWriter) {
                 /* closed by writer, return EOF */
                 return -1;

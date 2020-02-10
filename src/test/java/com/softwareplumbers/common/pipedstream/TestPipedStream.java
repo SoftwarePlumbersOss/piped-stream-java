@@ -104,4 +104,22 @@ public class TestPipedStream {
         readGarbage(500, in);
         readGarbage(1000, in);
     } 
+    
+    @Test(expected = TestError.class)
+    public void testOnlySendError() throws IOException {
+        PipedInputStream in = new PipedInputStream(1024);
+        PipedOutputStream out = new PipedOutputStream(in);
+        
+        new Thread(()->{
+            try {
+                Thread.sleep(1000);
+                out.sendError(new TestError());
+                out.close();
+            } catch (IOException | InterruptedException e) {
+            }
+            
+        }).start();
+        
+        readGarbage(100, in);
+    } 
 }
