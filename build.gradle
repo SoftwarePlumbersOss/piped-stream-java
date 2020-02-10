@@ -29,6 +29,7 @@ repositories {
 }
 
 uploadArchives {
+  dependsOn check
   repositories {
     mavenDeployer {
       repository(url: "https://nexus.softwareplumbers.com/repository/maven-oss") {
@@ -48,7 +49,7 @@ dependencies {
 }
 
 jar {
-  baseName 'qualified-name'
+  baseName 'pipedstream'
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
