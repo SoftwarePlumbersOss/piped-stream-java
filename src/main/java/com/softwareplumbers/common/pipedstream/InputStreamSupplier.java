@@ -72,6 +72,7 @@ public interface InputStreamSupplier {
      * @throws IOException 
      */
     public static InputStreamSupplier copy(InputStreamSupplier supplier) throws IOException {
+        if (supplier == null) return null;
         if (supplier.isPersistent()) 
             return supplier;
         else {
@@ -91,6 +92,6 @@ public interface InputStreamSupplier {
      * @return An input stream supplier which is persistent.
      */
     public static InputStreamSupplier markPersistent(InputStreamSupplier supplier) {
-        return new PersistentInputStreamSupplier(supplier);
+        return supplier == null ? null : new PersistentInputStreamSupplier(supplier);
     }
 }
