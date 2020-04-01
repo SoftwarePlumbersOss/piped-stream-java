@@ -29,19 +29,22 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * A piped output stream can be connected to a piped input stream
- * to create a communications pipe. The piped output stream is the
- * sending end of the pipe. Typically, data is written to a
- * <code>PipedOutputStream</code> object by one thread and data is
- * read from the connected <code>PipedInputStream</code> by some
+ * Replacement for java.io.PipedOutputStream with improved error propagation.
+ * 
+ * The piped output stream is the sending end of the pipe. Typically, data is
+ * written to a `PipedOutputStream` object by one thread and data is
+ * read from the connected `PipedInputStream` by some
  * other thread. Attempting to use both objects from a single thread
  * is not recommended as it may deadlock the thread.
- * The pipe is said to be <a name=BROKEN> <i>broken</i> </a> if a
+ * The pipe is said to be  _broken_  if a
  * thread that was reading data bytes from the connected piped input
  * stream is no longer alive.
+ * 
+ * This code has been modified to permit propagation of errors
+ * between the output and input sides of the pipe.
  *
  * @author  James Gosling
- * @see     java.io.PipedInputStream
+ * @see     com.softwareplumbers.common.pipedstream.PipedInputStream
  * @since   JDK1.0
  */
 public
@@ -56,7 +59,7 @@ class PipedOutputStream extends OutputStream {
     /**
      * Creates a piped output stream connected to the specified piped
      * input stream. Data bytes written to this stream will then be
-     * available as input from <code>snk</code>.
+     * available as input from `snk`.
      *
      * @param      snk   The piped input stream to connect to.
      * @exception  IOException  if an I/O error occurs.
@@ -70,8 +73,8 @@ class PipedOutputStream extends OutputStream {
      * piped input stream. It must be connected to a piped input stream,
      * either by the receiver or the sender, before being used.
      *
-     * @see     java.io.PipedInputStream#connect(java.io.PipedOutputStream)
-     * @see     java.io.PipedOutputStream#connect(java.io.PipedInputStream)
+     * @see     com.softwareplumbers.common.pipedstream.PipedInputStream#connect(com.softwareplumbers.common.pipedstream.PipedOutputStream)
+     * @see     com.softwareplumbers.common.pipedstream.PipedOutputStream#connect(com.softwareplumbers.common.pipedstream.PipedInputStream)
      */
     public PipedOutputStream() {
     }
@@ -79,16 +82,16 @@ class PipedOutputStream extends OutputStream {
     /**
      * Connects this piped output stream to a receiver. If this object
      * is already connected to some other piped input stream, an
-     * <code>IOException</code> is thrown.
+     * `IOException` is thrown.
      * <p>
-     * If <code>snk</code> is an unconnected piped input stream and
-     * <code>src</code> is an unconnected piped output stream, they may
+     * If `snk` is an unconnected piped input stream and
+     * `src` is an unconnected piped output stream, they may
      * be connected by either the call:
-     * <blockquote><pre>
-     * src.connect(snk)</pre></blockquote>
+     * ```
+     * src.connect(snk)```
      * or the call:
-     * <blockquote><pre>
-     * snk.connect(src)</pre></blockquote>
+     * ```
+     * snk.connect(src)```
      * The two calls have the same effect.
      *
      * @param      snk   the piped input stream to connect to.
@@ -107,13 +110,13 @@ class PipedOutputStream extends OutputStream {
     }
 
     /**
-     * Writes the specified <code>byte</code> to the piped output stream.
+     * Writes the specified `byte` to the piped output stream.
      * <p>
-     * Implements the <code>write</code> method of <code>OutputStream</code>.
+     * Implements the `write` method of `OutputStream`.
      *
-     * @param      b   the <code>byte</code> to be written.
-     * @exception IOException if the pipe is <a href=#BROKEN> broken</a>,
-     *          {@link #connect(java.io.PipedInputStream) unconnected},
+     * @param      b   the `byte` to be written.
+     * @exception IOException if the pipe is  broken,
+     *          {@link #connect(com.softwareplumbers.common.pipedstream.PipedInputStream) unconnected},
      *          closed, or if an I/O error occurs.
      */
     public void write(int b)  throws IOException {
@@ -124,16 +127,16 @@ class PipedOutputStream extends OutputStream {
     }
 
     /**
-     * Writes <code>len</code> bytes from the specified byte array
-     * starting at offset <code>off</code> to this piped output stream.
+     * Writes `len` bytes from the specified byte array
+     * starting at offset `off` to this piped output stream.
      * This method blocks until all the bytes are written to the output
      * stream.
      *
      * @param      b     the data.
      * @param      off   the start offset in the data.
      * @param      len   the number of bytes to write.
-     * @exception IOException if the pipe is <a href=#BROKEN> broken</a>,
-     *          {@link #connect(java.io.PipedInputStream) unconnected},
+     * @exception IOException if the pipe is  broken,
+     *          {@link #connect(com.softwareplumbers.common.pipedstream.PipedInputStream) unconnected},
      *          closed, or if an I/O error occurs.
      */
     public void write(byte b[], int off, int len) throws IOException {

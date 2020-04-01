@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2020 Software Plumbers LLC. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  
+ */
 package com.softwareplumbers.common.pipedstream;
 
 import java.io.ByteArrayOutputStream;
@@ -7,6 +15,16 @@ import java.io.InputStream;
 /** A functional interface for something that returns a stream. 
  * 
  * Because such operations typically throw an IOException, we can't use a regular Suppler.
+ * We find the distinction between a Stream and a Stream Supplier is very useful in order
+ * to reduce the risk that a stream will not be closed. If we retrieve a stream supplier
+ * from somewhere, we can pass this object around without worrying about whether it needs
+ * to be closed. When the stream actually needs to be used, we can write something like:
+ * 
+ * ```
+ * try (InputStream is = supplier.get()) { ... }
+ * ```
+ * 
+ * In order to handle the stream in a way that guarantees its closure.
  * 
  * Some utility methods are also provided.
  * 
@@ -30,6 +48,24 @@ public interface InputStreamSupplier {
      */
     default boolean isPersistent() { return false; }
     
+    /** Create an Input Stream that receives information from some output stream.
+     * 
+     * Sometimes, inevitably, we find an API that wants to 'push' data (via an OutputStream)
+     * when we really want to 'pull' it (via an InputStream). Writing the entire stream content
+     * to a buffer and then reading it back out again is not a tremendously happy solution.
+     * 
+     * This method will immediately return an InputStream. It will spin off a separate thread
+     * which will call output.consume in order to buffer data for consumption via the InputStream.
+     * Data becomes available for consumption on the InputStream as soon as it is written by the
+     * OutputStreamConsumer. 
+     * 
+     * @see PipedInputStream
+     * @see PipedOutputStream
+     * 
+     * @param output
+     * @return An input stream that will eventually receive all data written to output
+     * @throws IOException 
+     */
     public static InputStream pipe(OutputStreamConsumer output) throws IOException {
         PipedOutputStream out = new PipedOutputStream();
         PipedInputStream in = new PipedInputStream(out);
@@ -86,7 +122,7 @@ public interface InputStreamSupplier {
     /** Mark a supplier as persistent.
      * 
      * If we know that a supplier is already persistent, we can mark it as such 
-     * with this method.
+     * with this method. This will avoid unnecessary copy operations.
      * 
      * @param supplier
      * @return An input stream supplier which is persistent.
