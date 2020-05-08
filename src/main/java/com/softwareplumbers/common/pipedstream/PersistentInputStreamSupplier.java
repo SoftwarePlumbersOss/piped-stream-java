@@ -40,4 +40,9 @@ public class PersistentInputStreamSupplier implements InputStreamSupplier {
     public PersistentInputStreamSupplier(byte[] data) {
         this(()->new ByteArrayInputStream(data));
     }
+    
+    @Override
+    public boolean isPersistent() {
+        return true;
+    }
 }
